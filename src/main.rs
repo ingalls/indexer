@@ -1,5 +1,6 @@
 #[macro_use] extern crate clap;
 extern crate serde_json;
+extern crate rayon;
 
 use std::io::{BufRead, BufReader};
 use clap::App;
