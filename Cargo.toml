@@ -1,0 +1,6 @@
+[package]
+name = "indexer"
+version = "0.1.0"
+authors = ["ingalls <ingalls@protonmail.com>"]
+
+[dependencies]
