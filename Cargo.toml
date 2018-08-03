@@ -4,3 +4,7 @@ version = "0.1.0"
 authors = ["ingalls <ingalls@protonmail.com>"]
 
 [dependencies]
+
+[dependencies.clap]
+features = ["yaml"]
+version = "2.31.2"

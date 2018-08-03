@@ -1,0 +1,17 @@
+name: indexer
+author: Nicholas Ingalls <ingalls@protonmail.com>
+about: Rust based carmen compat index generator
+version: 0.1.0
+args:
+    - input:
+        short: i
+        long: input
+        value_name: INPUT
+        help: GeoJSON File to read from
+        takes_value: true
+    - output:
+        short: o
+        long: output
+        value_name: OUTPUT
+        help: MBTiles index to write to
+        takes_value: true
