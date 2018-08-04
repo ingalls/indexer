@@ -20,7 +20,7 @@ fn main() {
         }
     };
 
-    let mut indexer = Indexer::new(input);
+    let mut indexer = Indexer::new(input, 14);
     let mut docs = Vec::with_capacity(10000);
 
     for _ in 0..10000 {
@@ -30,8 +30,5 @@ fn main() {
         };
     }
 
-    let _i: Vec<i64> =  docs.par_iter().map(|doc| {
-        println!("{:?}", &doc);    
-        1
-    }).collect();
+    let _i: Vec<i64> =  docs.par_iter().map(Indexer::process).collect();
 }
