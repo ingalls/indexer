@@ -1,10 +1,11 @@
-extern crate serde_json;
+extern crate geojson;
 
+use geojson::{GeoJson};
 use std::io::{BufRead, BufReader};
 use std::iter::Iterator;
 use std::fs::File;
+use std::str;
 use std::process;
-use serde_json::Value;
 
 pub struct Indexer {
     zoom: u8,
@@ -24,15 +25,15 @@ impl Indexer {
         }
     }
 
-    pub fn process(doc: &Value) -> i64 {
+    pub fn process(doc: &GeoJson) -> i64 {
         1
     }
 }
 
 impl Iterator for Indexer {
-    type Item = Value;
+    type Item = GeoJson;
 
-    fn next(&mut self) -> Option<Value> {
+    fn next(&mut self) -> Option<GeoJson> {
         let mut data = Vec::new();
 
         loop {
@@ -42,9 +43,9 @@ impl Iterator for Indexer {
                     //Skip empty lines
                     if data.len() == 1 as usize && data[0] == 10 as u8 { continue; }
 
-                    let input: Value = match serde_json::from_slice(&data) {
+                    let input: GeoJson = match str::from_utf8(&data).unwrap().parse::<GeoJson>() {
                         Ok(input) => input,
-                        Err(_) => panic!("Not Valid JSON")
+                        Err(_) => panic!("Not Valid GeoJSON")
                     };
 
                     return Some(input)
