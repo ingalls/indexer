@@ -23,12 +23,22 @@ fn main() {
     let mut indexer = Indexer::new(input, 14);
     let mut docs = Vec::with_capacity(10000);
 
-    for _ in 0..10000 {
-        match indexer.next() {
-            Some(doc) => { docs.push(doc); },
-            None => { break; }
-        };
-    }
+    let mut final_batch = false;
+    loop {
+        for _ in 0..10000 {
+            match indexer.next() {
+                Some(doc) => { docs.push(doc); },
+                None => {
+                    final_batch = true;
+                    break;
+                }
+            };
+        }
 
-    let _i: Vec<i64> =  docs.par_iter().map(Indexer::process).collect();
+        let _i: Vec<i64> =  docs.par_iter().map(Indexer::process).collect();
+
+        if final_batch {
+            break;
+        }
+    }
 }
