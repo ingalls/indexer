@@ -1,6 +1,6 @@
 extern crate geojson;
 
-use geojson::{GeoJson};
+use geojson::{GeoJson, Feature};
 use std::io::{BufRead, BufReader};
 use std::iter::Iterator;
 use std::fs::File;
@@ -25,15 +25,15 @@ impl Indexer {
         }
     }
 
-    pub fn process(doc: &GeoJson) -> i64 {
+    pub fn process(doc: &Feature) -> i64 {
         1
     }
 }
 
 impl Iterator for Indexer {
-    type Item = GeoJson;
+    type Item = Feature;
 
-    fn next(&mut self) -> Option<GeoJson> {
+    fn next(&mut self) -> Option<Feature> {
         let mut data = Vec::new();
 
         loop {
@@ -43,15 +43,28 @@ impl Iterator for Indexer {
                     //Skip empty lines
                     if data.len() == 1 as usize && data[0] == 10 as u8 { continue; }
 
-                    let input: GeoJson = match str::from_utf8(&data).unwrap().parse::<GeoJson>() {
-                        Ok(input) => input,
-                        Err(_) => panic!("Not Valid GeoJSON")
+                    let input: GeoJson = match str::from_utf8(&data) {
+                        Ok(data) => match data.parse::<GeoJson>() {
+                            Ok(input) => input,
+                            Err(_) => panic!("Not Valid GeoJSON")
+                        },
+                        Err(_) => {
+                            println!("Invalid UTF8 Data");
+                            process::exit(1);
+                        }
                     };
 
-                    return Some(input)
+                    match input {
+                        GeoJson::Feature(feat) => { return Some(feat) },
+                        _ => {
+                            println!("All Data must be GeoJSON Feature Types");
+                            process::exit(1);
+                        }
+                    };
                 }
-                
             }
+
+            data.clear();
         }
     }
 }
