@@ -2,6 +2,7 @@ extern crate geojson;
 extern crate serde_json;
 
 const MAX_TEXT_SYNONYMS: u8 = 10;
+const MAX_VERTICES: u32 = 50000;
 
 use serde_json::Value;
 use geojson::{GeoJson, Feature};
@@ -115,6 +116,8 @@ impl Doc {
         return doc;
         */
 
+
+        Ok(())
     }
 
     pub fn is_valid(doc: &Feature) -> Result<(), String> {
@@ -127,10 +130,6 @@ impl Doc {
             },
             _ => { return Err(String::from("DATA ERROR: doc has no id")); },
         };
-
-        if doc.geometry.is_none() {
-            return Err(format!("DATA ERROR: doc has no geometry on id {}", &id));
-        }
 
         match &doc.properties {
             None => { return Err(format!("DATA ERROR: doc has no properties on id {}", &id)); },
@@ -155,33 +154,40 @@ impl Doc {
                 } 
 
                 if props.contains_key("carmen:geocoder_stack") && !props.get("carmen:geocoder_stack").unwrap().is_string() {
-                    return Err(format!("DATA ERROR: doc has non-string value for carmen:geocoder_stack"));
+                    return Err(format!("DATA ERROR: doc has non-string value for carmen:geocoder_stack on id {}", &id));
                 }
+            }
+        };
 
-                /*
-                if (doc.geometry.type === 'Polygon' || doc.geometry.type === 'MultiPolygon') {
-                    // check for Polygons or Multipolygons with too many vertices
-                    let vertices = 0;
-                    let ringCount;
-                    if (doc.geometry.type === 'Polygon') {
-                        ringCount = doc.geometry.coordinates.length;
-                        for (let i = 0; i < ringCount; i++) {
-                            vertices += doc.geometry.coordinates[i].length;
+        match &doc.geometry {
+            None => { return Err(format!("DATA ERROR: doc has no geometry on id {}", &id)); },
+            Some(geom) => {
+
+                match &geom.value {
+                    geojson::Value::Polygon(poly) => {
+                        let mut verts: u32 = 0;
+                        for vec in poly {
+                            verts += vec.len() as u32;
                         }
-                    } else {
-                        const polygonCount = doc.geometry.coordinates.length;
-                        for (let k = 0; k < polygonCount; k++) {
-                            ringCount = doc.geometry.coordinates[k].length;
-                            for (let j = 0; j < ringCount; j++) {
-                                vertices += doc.geometry.coordinates[k][j].length;
+
+                        if verts > MAX_VERTICES {
+                            return Err(format!("DATA ERROR: doc exceeds {} vertices max on id {}", &MAX_VERTICES, &id));
+                        }
+                    },
+                    geojson::Value::MultiPolygon(mpoly) => {
+                        let mut verts: u32 = 0;
+                        for vecs in mpoly {
+                            for vec in vecs {
+                                verts += vec.len() as u32;
                             }
                         }
-                    }
-                    if (vertices > 50000) {
-                        throw Error('Polygons may not have more than 50k vertices. Simplify your polygons, or split the polygon into multiple parts on id:' + doc.id);
-                */
 
-
+                        if verts > MAX_VERTICES {
+                            return Err(format!("DATA ERROR: doc exceeds {} vertices max on id {}", &MAX_VERTICES, &id));
+                        }
+                    },
+                    _ => ()
+                }
             }
         };
 
