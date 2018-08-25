@@ -1,5 +1,6 @@
 extern crate geojson; 
 extern crate serde_json;
+extern crate geojson_rewind;
 
 const MAX_TEXT_SYNONYMS: u8 = 10;
 const MAX_VERTICES: u32 = 50000;
@@ -11,19 +12,15 @@ use std::iter::Iterator;
 use std::fs::File;
 use std::str;
 use std::process;
+use geojson_rewind::rewind;
 
 pub struct Doc();
 
 impl Doc {
     pub fn standardize(doc: &mut Feature) -> Result<(), String> {
+        rewind(doc, true);
+
         /*
-        if (doc.geometry && (doc.geometry.type === 'Polygon' || doc.geometry.type === 'MultiPolygon')) {
-            doc = rewind(doc);
-        }
-
-        // Requires MultiPolygons to be in proper winding order
-        runChecks(doc, zoom);
-
         let tiles = [];
         if (doc.geometry.type === 'GeometryCollection' && !doc.properties['carmen:zxy']) {
             doc.properties['carmen:zxy'] = [];
@@ -213,7 +210,9 @@ impl Indexer {
         }
     }
 
-    pub fn process(doc: &Feature) -> i64 {
+    pub fn process(doc: &mut Feature) -> i64 {
+        Doc::standardize(doc);
+
         match Doc::is_valid(&doc) {
             Err(err) => {
                 /*

@@ -35,7 +35,7 @@ fn main() {
             };
         }
 
-        let _i: Vec<i64> =  docs.par_iter().map(Indexer::process).collect();
+        let _i: Vec<i64> =  docs.par_iter_mut().map(Indexer::process).collect();
 
         if final_batch {
             break;
