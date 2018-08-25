@@ -254,6 +254,8 @@ impl Iterator for Indexer {
                         }
                     };
 
+                    data.clear();
+
                     match input {
                         GeoJson::Feature(feat) => { return Some(feat) },
                         _ => {
@@ -263,8 +265,6 @@ impl Iterator for Indexer {
                     };
                 }
             };
-
-            data.clear();
         }
     }
 }
